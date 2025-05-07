@@ -2,9 +2,14 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
+    id("androidx.navigation.safeargs.kotlin") version "2.5.3"
 }
 
 android {
+    buildFeatures {
+        viewBinding = true
+    }
+
     namespace = "com.example.spaceflightnews"
     compileSdk = 35
 
@@ -43,6 +48,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -69,4 +76,8 @@ dependencies {
     implementation(libs.gson.converter)
     implementation(libs.lifecycle.viewmodel.ktx)
     ksp("androidx.room:room-compiler:2.5.0")
+    implementation(libs.lottie)
+
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
 }
