@@ -12,7 +12,8 @@ data class ArticleEntity(
     val imageUrl: String?,
     val publishedAt: String,
     val url: String,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val cachedAt: Long
 )
 
 fun ArticleEntity.toDomain(): Article {
@@ -23,6 +24,7 @@ fun ArticleEntity.toDomain(): Article {
         imageUrl = imageUrl,
         publishedAt = publishedAt,
         url = url,
-        isFavorite = isFavorite
+        isFavorite = isFavorite,
+        cachedAt = cachedAt
     )
 }
