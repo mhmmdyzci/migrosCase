@@ -9,7 +9,8 @@ data class ArticleDto(
     val summary: String,
     @SerializedName("image_url") val imageUrl: String?,
     @SerializedName("published_at") val publishedAt: String,
-    val url: String
+    val url: String,
+    val cachedAt : Long = System.currentTimeMillis()
 )
 
 fun ArticleDto.toEntity(): ArticleEntity {
@@ -19,6 +20,7 @@ fun ArticleDto.toEntity(): ArticleEntity {
         summary = summary,
         imageUrl = imageUrl,
         publishedAt = publishedAt,
-        url = url
+        url = url,
+        cachedAt = cachedAt
     )
 }

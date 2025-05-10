@@ -19,6 +19,7 @@ navigationFragmentKtx = "2.8.9"
 navigationUiKtx = "2.8.9"
 lottie = "3.4.0"
 navigation = "2.5.3"
+swiperefreshlayout = "1.1.0"
 
 [libraries]
 
@@ -57,6 +58,8 @@ androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation
 lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie" }
 navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
 navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
+swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

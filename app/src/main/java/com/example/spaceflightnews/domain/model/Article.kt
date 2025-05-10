@@ -7,5 +7,6 @@ data class Article(
     val imageUrl: String?,
     val publishedAt: String,
     val url: String,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val cachedAt : Long = System.currentTimeMillis()
 )
