@@ -27,15 +27,24 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     private lateinit var viewModel: NewsViewModel
     private lateinit var articleAdapter: ArticleAdapter
     private var articleList: List<Article> = emptyList()
+    private var isSwipeRefreshing = false
+    private var lastToastTime = 0L
+    private val toastCooldownMillis = 2000L
+
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViewModel()
         setupRecyclerView()
-        setupObservers()
         setupSwipeToRefresh()
         setupSearch()
+        setupObservers()
+
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        initViewModel()
         decideInitialLoad()
     }
 
@@ -67,11 +76,15 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
                         if (NetworkUtil.isNetworkAvailable(requireContext())) {
                             viewModel.fetchArticles(requireContext())
                         } else {
-                            Toast.makeText(
-                                requireContext(),
-                                "No internet connection",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            val currentTime = System.currentTimeMillis()
+                            if (currentTime - lastToastTime > toastCooldownMillis) {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "No internet connection",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                lastToastTime = currentTime
+                            }
                         }
                     }
                 }
@@ -94,7 +107,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
         }
 
         viewModel.loading.observe(viewLifecycleOwner) {
-            isShowMainLoading(it)
+            if (isSwipeRefreshing) {
+                binding.swipeRefreshLayout.isRefreshing = false
+                isSwipeRefreshing = false
+            } else{
+                isShowMainLoading(it)
+            }
         }
 
         viewModel.error.observe(viewLifecycleOwner) {
@@ -109,9 +127,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     private fun setupSwipeToRefresh() {
         binding.swipeRefreshLayout.setOnRefreshListener {
             if (NetworkUtil.isNetworkAvailable(requireContext()) && !viewModel.isLoading()) {
+                isSwipeRefreshing = true
                 viewModel.refreshFromApi(requireContext())
 
             } else {
+                isSwipeRefreshing = false
                 binding.swipeRefreshLayout.isRefreshing = false
                 Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT)
                     .show()
