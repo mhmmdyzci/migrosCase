@@ -22,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         bottomNavigationView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
+            isShowLoading(false)
             when (destination.id) {
                 R.id.homeFragment,
                 R.id.favoritesFragment -> bottomNavigationView.visibility = View.VISIBLE

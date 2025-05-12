@@ -1,11 +1,19 @@
 package com.example.spaceflightnews.presentation.fragment.detail
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 import com.example.spaceflightnews.R
 import com.example.spaceflightnews.core.SpaceflightApp
 import com.example.spaceflightnews.databinding.FragmentDetailBinding
@@ -44,11 +52,39 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(FragmentDetailBinding
             detailDate.text = formatDate(article.publishedAt)
 
             if (!article.imageUrl.isNullOrEmpty()) {
+
                 Glide.with(requireContext())
                     .load(article.imageUrl)
-                    .into(detailImage)
+                    .listener(object : RequestListener<Drawable> {
+
+
+
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable?>,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            imgProgressBar.visibility = View.GONE
+                            cardNews.visibility = View.GONE
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable?>?,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            imgProgressBar.visibility = View.GONE
+                            return false
+                        }
+
+                    })
+                    .into(imgNews)
             } else {
-                detailImage.setImageResource(R.drawable.ic_launcher_background)
+                cardNews.visibility = View.GONE
             }
 
 
@@ -83,6 +119,9 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(FragmentDetailBinding
                 } else {
                     binding.btnFavorite.setImageResource(R.drawable.icon_bookmark)
                 }
+            }
+            imgBack.setOnClickListener {
+                findNavController().navigateUp()
             }
 
         }

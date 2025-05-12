@@ -51,7 +51,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="5dp"
                         android:src="@drawable/search_icon"
-                        app:tint="@color/light_gray" />
+                        app:tint="@color/gray_button_stroke_color" />
 
                     <EditText
                         android:id="@+id/edit_text_search"
@@ -62,12 +62,12 @@
                         android:autofillHints="name"
                         android:background="@null"
                         android:fontFamily="@font/gilroy_regular"
-                        android:hint="Arama"
+                        android:hint="@string/search"
                         android:inputType="text"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:textColor="@color/black"
-                        android:textColorHint="@color/light_gray"
+                        android:textColorHint="@color/gray_button_stroke_color"
                         android:textSize="14sp" />
 
                 </LinearLayout>
