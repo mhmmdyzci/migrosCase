@@ -1,7 +1,6 @@
 package com.example.spaceflightnews.network.repository
 
 import android.content.Context
-import com.example.spaceflightnews.core.SpaceflightApp
 import com.example.spaceflightnews.data.local.dao.ArticleDao
 import com.example.spaceflightnews.data.local.entity.toDomain
 import com.example.spaceflightnews.data.remote.dto.toEntity
@@ -16,17 +15,25 @@ class NewsRepositoryImpl(
 
     override suspend fun getArticles(limit: Int, offset: Int, context: Context): List<Article> {
         val response = api.getArticles(limit, offset)
-        val entities = response.results.map { it.toEntity() }
+
+        val existingArticles = dao.getAllArticles().associateBy { it.id }
+
+        val entities = response.results.map { dto ->
+            val oldEntity = existingArticles[dto.id]
+            dto.toEntity().copy(isFavorite = oldEntity?.isFavorite ?: false)
+        }
 
         if (offset == 0) {
             dao.clearArticles()
         }
-        PreferenceHelper.saveLastUpdateTime(context, System.currentTimeMillis())
 
         dao.insertArticles(entities)
-        return entities.map { it.toDomain() }
 
+        PreferenceHelper.saveLastUpdateTime(context, System.currentTimeMillis())
+
+        return entities.map { it.toDomain() }
     }
+
 
     override suspend fun getArticleById(id: Int): Article {
         return try {
@@ -40,4 +47,17 @@ class NewsRepositoryImpl(
     override suspend fun getCachedArticles(): List<Article> {
         return dao.getAllArticles().map { it.toDomain() }
     }
+
+    override suspend fun updateFavoriteStatus(id: Int, isFavorite: Boolean) {
+        dao.updateFavoriteStatus(id, isFavorite)
+    }
+
+    override suspend fun isArticleFavorited(articleId: Int): Boolean {
+        return dao.isFavorited(articleId)
+    }
+
+    override suspend fun getFavoriteArticles(): List<Article> {
+        return dao.getFavoriteArticles().map { it.toDomain() }
+    }
+
 }

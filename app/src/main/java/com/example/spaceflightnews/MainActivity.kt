@@ -1,12 +1,10 @@
 package com.example.spaceflightnews
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import androidx.activity.enableEdgeToEdge
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+
 
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -30,5 +28,10 @@ class MainActivity : AppCompatActivity() {
                 else -> bottomNavigationView.visibility = View.GONE
             }
         }
+    }
+
+    fun isShowLoading(isShowLoading : Boolean) {
+        findViewById<ProgressBar>(R.id.progress_bar).visibility =
+            if (isShowLoading) View.VISIBLE else View.GONE
     }
 }

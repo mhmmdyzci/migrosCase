@@ -5,7 +5,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.SearchView
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spaceflightnews.core.SpaceflightApp
@@ -46,7 +46,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     }
 
     private fun setupRecyclerView() {
-        articleAdapter = ArticleAdapter()
+        articleAdapter = ArticleAdapter { article ->
+            val action = HomeFragmentDirections.actionHomeFragmentToDetailFragment(article)
+            findNavController().navigate(action)
+        }
         binding.articleRecyclerView.adapter = articleAdapter
 
         binding.articleRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -64,7 +67,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
                         if (NetworkUtil.isNetworkAvailable(requireContext())) {
                             viewModel.fetchArticles(requireContext())
                         } else {
-                            Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "No internet connection",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }
@@ -74,20 +81,20 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     }
 
 
-        private fun setupObservers() {
+    private fun setupObservers() {
         viewModel.articles.observe(viewLifecycleOwner) {
             articleList = it
             articleAdapter.submitList(it)
             if (!getFormattedLastUpdate().isEmpty() && it.isNotEmpty()) {
                 binding.lastUpdateLayout.visibility = View.VISIBLE
                 binding.lastUpdateText.text = getFormattedLastUpdate()
-            } else{
+            } else {
                 binding.lastUpdateLayout.visibility = View.GONE
             }
         }
 
         viewModel.loading.observe(viewLifecycleOwner) {
-            binding.swipeRefreshLayout.isRefreshing = it
+            isShowMainLoading(it)
         }
 
         viewModel.error.observe(viewLifecycleOwner) {
@@ -95,6 +102,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
         }
+
+
     }
 
     private fun setupSwipeToRefresh() {
@@ -104,7 +113,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
 
             } else {
                 binding.swipeRefreshLayout.isRefreshing = false
-                Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -130,15 +140,17 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
 
             override fun afterTextChanged(updatedText: Editable?) {
                 if (updatedText.toString().isEmpty() == true) {
+                    binding.lastUpdateLayout.visibility = View.VISIBLE
+                    binding.editTextSearch.clearFocus()
                     viewModel.isSearching = false
                     refreshList()
                 } else {
+                    binding.lastUpdateLayout.visibility = View.GONE
                     viewModel.isSearching = false
                     filterList(updatedText.toString(), articleList)
                 }
             }
         })
-
 
 
     }

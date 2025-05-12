@@ -1,7 +1,6 @@
 package com.example.spaceflightnews.viewModel
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,6 +19,12 @@ class NewsViewModel(private val repository: NewsRepository) : ViewModel() {
 
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
+
+    val _isFavorite= MutableLiveData<Boolean>()
+    var isFavorite: LiveData<Boolean> = _isFavorite
+
+    private val _favoriteArticles = MutableLiveData<List<Article>>()
+    val favoriteArticles: LiveData<List<Article>> = _favoriteArticles
 
     private var currentPage = 0
     private val pageSize = 10
@@ -81,13 +86,25 @@ class NewsViewModel(private val repository: NewsRepository) : ViewModel() {
         }
     }
 
-    fun searchArticles(query: String) {
-        isSearching = true
-        _articles.value = allArticles.filter {
-            it.title.contains(query, ignoreCase = true)
+
+    fun updateFavorite(id: Int, isFavorite: Boolean) {
+        viewModelScope.launch {
+            repository.updateFavoriteStatus(id, isFavorite)
         }
     }
 
+
+    fun isArticleFavorited(articleId: Int) {
+        viewModelScope.launch {
+            _isFavorite.value =  repository.isArticleFavorited(articleId)
+        }
+    }
+
+    fun getFavoriteArticles(){
+        viewModelScope.launch {
+            _favoriteArticles.value = repository.getFavoriteArticles()
+        }
+    }
 
 
 }

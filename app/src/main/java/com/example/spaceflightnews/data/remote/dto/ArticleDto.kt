@@ -22,5 +22,6 @@ fun ArticleDto.toEntity(): ArticleEntity {
         publishedAt = publishedAt,
         url = url,
         cachedAt = cachedAt
+
     )
 }

@@ -39,7 +39,7 @@
         android:layout_gravity="center"
         android:visibility="gone"
         tools:visibility="visible"
-        android:indeterminateTint="@color/white"
+        android:indeterminateTint="@color/credit_card_input_black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

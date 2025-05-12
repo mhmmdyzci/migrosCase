@@ -8,10 +8,11 @@ import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spaceflightnews.databinding.ItemArticleBinding
 import com.example.spaceflightnews.domain.model.Article
-import java.text.SimpleDateFormat
-import java.util.Locale
+import com.example.spaceflightnews.util.DateUtil.formatDate
 
-class ArticleAdapter : RecyclerView.Adapter<ArticleAdapter.ArticleViewHolder>() {
+class ArticleAdapter(
+    private val onItemClick: (Article) -> Unit
+) : RecyclerView.Adapter<ArticleAdapter.ArticleViewHolder>() {
 
     private val articles = mutableListOf<Article>()
 
@@ -22,18 +23,13 @@ class ArticleAdapter : RecyclerView.Adapter<ArticleAdapter.ArticleViewHolder>() 
             binding.articleTitle.text = article.title
             binding.articleSummary.text = article.summary
             binding.articleDate.text = formatDate(article.publishedAt)
-        }
 
-        private fun formatDate(isoDate: String): String {
-            return try {
-                val sdfInput = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                val sdfOutput = SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault())
-                val date = sdfInput.parse(isoDate.replace("Z", "").substring(0, 19))
-                sdfOutput.format(date!!)
-            } catch (e: Exception) {
-                isoDate
+            binding.root.setOnClickListener {
+                onItemClick(article)
             }
         }
+
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {

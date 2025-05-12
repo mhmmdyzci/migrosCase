@@ -20,6 +20,7 @@ navigationUiKtx = "2.8.9"
 lottie = "3.4.0"
 navigation = "2.5.3"
 swiperefreshlayout = "1.1.0"
+glide = "4.16.0"
 
 [libraries]
 
@@ -59,12 +60,15 @@ lottie = { group = "com.airbnb.android", name = "lottie", version.ref = "lottie"
 navigation-fragment-ktx = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "navigation" }
 navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "navigation" }
 swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
+glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
+glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
 
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 navigation-safe-args = { id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation" }
+ksp = { id = "com.google.devtools.ksp", version = "1.0.15" } # Eğer KSP kullanıyorsan
 
 
 
