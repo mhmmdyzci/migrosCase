@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.example.spaceflightnews.MainActivity
 
 abstract class BaseFragment<VB : androidx.viewbinding.ViewBinding>(
     private val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> VB
@@ -24,6 +25,11 @@ abstract class BaseFragment<VB : androidx.viewbinding.ViewBinding>(
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    fun isShowMainLoading(isShowLoading : Boolean) {
+        (activity as? MainActivity)?.isShowLoading(isShowLoading)
+
     }
 
 }

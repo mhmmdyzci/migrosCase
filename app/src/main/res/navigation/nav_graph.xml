@@ -28,7 +28,7 @@
     </fragment>
     <fragment
         android:id="@+id/favoritesFragment"
-        android:name="com.example.spaceflightnews.presentation.fragment.FavoritesFragment"
+        android:name="com.example.spaceflightnews.presentation.fragment.favorites.FavoritesFragment"
         android:label="fragment_favorites"
         tools:layout="@layout/fragment_favorites" >
         <action
@@ -37,7 +37,12 @@
     </fragment>
     <fragment
         android:id="@+id/detailFragment"
-        android:name="com.example.spaceflightnews.presentation.fragment.DetailFragment"
+        android:name="com.example.spaceflightnews.presentation.fragment.detail.DetailFragment"
         android:label="fragment_detail"
-        tools:layout="@layout/fragment_detail" />
+        tools:layout="@layout/fragment_detail" >
+
+        <argument
+            android:name="article"
+            app:argType="com.example.spaceflightnews.domain.model.Article" />
+    </fragment>
 </navigation>

@@ -1,6 +1,7 @@
 package com.example.spaceflightnews.network.retrofit
 
 
+import com.example.spaceflightnews.util.Constants
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -9,7 +10,6 @@ import java.util.concurrent.TimeUnit
 
 class RetrofitBuilder() {
 
-    private val BASE_URL = "https://api.spaceflightnewsapi.net/v4/"
 
     private val loggingInterceptor by lazy {
         HttpLoggingInterceptor().apply {
@@ -27,7 +27,7 @@ class RetrofitBuilder() {
 
     fun buildRetrofit(): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(Constants.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

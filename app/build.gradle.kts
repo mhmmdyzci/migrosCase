@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp")
     id("androidx.navigation.safeargs.kotlin") version "2.5.3"
+    id("kotlin-parcelize")
 }
 
 android {
@@ -81,5 +82,6 @@ dependencies {
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
     implementation(libs.swiperefreshlayout)
+    implementation(libs.glide)
 
 }

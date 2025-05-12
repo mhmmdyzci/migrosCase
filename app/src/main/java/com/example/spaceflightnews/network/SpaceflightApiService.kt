@@ -2,19 +2,20 @@ package com.example.spaceflightnews.network
 
 import com.example.spaceflightnews.data.remote.dto.ArticleDto
 import com.example.spaceflightnews.data.remote.dto.ArticleResponseDto
+import com.example.spaceflightnews.util.Constants
 import retrofit2.http.*
 
 
 interface SpaceflightApiService {
 
-    @GET("articles")
+    @GET(Constants.EndPoints.ARTICLES)
     suspend fun getArticles(
-        @Query("limit") limit: Int,
-        @Query("offset") offset: Int
+        @Query(Constants.Queries.LIMIT) limit: Int,
+        @Query(Constants.Queries.OFFSET) offset: Int
     ): ArticleResponseDto
 
-    @GET("articles/{id}")
+    @GET(Constants.EndPoints.ARTICLE)
     suspend fun getArticleById(
-        @Path("id") id: Int
+        @Path(Constants.Paths.ARTICLE_ID) id: Int
     ): ArticleDto
 }

@@ -20,4 +20,13 @@ interface ArticleDao {
 
     @Query("SELECT * FROM articles WHERE id = :id")
     suspend fun getArticleById(id: Int): ArticleEntity?
+
+    @Query("UPDATE articles SET isFavorite = :isFavorite WHERE id = :id")
+    suspend fun updateFavoriteStatus(id: Int, isFavorite: Boolean)
+
+    @Query("SELECT isFavorite FROM articles WHERE id = :id")
+    suspend fun isFavorited(id: Int): Boolean
+
+    @Query("SELECT * FROM articles WHERE isFavorite = 1 ORDER BY cachedAt DESC")
+    suspend fun getFavoriteArticles(): List<ArticleEntity>
 }
