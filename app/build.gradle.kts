@@ -54,6 +54,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
+    testImplementation(libs.androidx.core.testing)
+
     // Room
     implementation(libs.room.runtime)
 
@@ -83,5 +87,6 @@ dependencies {
     implementation(libs.navigation.ui.ktx)
     implementation(libs.swiperefreshlayout)
     implementation(libs.glide)
+    testImplementation(kotlin("test"))
 
 }
