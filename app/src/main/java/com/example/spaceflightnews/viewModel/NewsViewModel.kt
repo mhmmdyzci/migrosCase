@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModel
 import com.example.spaceflightnews.network.repository.NewsRepository
 import androidx.lifecycle.viewModelScope
 import com.example.spaceflightnews.domain.model.Article
+import com.example.spaceflightnews.util.Event
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class NewsViewModel(private val repository: NewsRepository) : ViewModel() {
@@ -25,6 +28,10 @@ class NewsViewModel(private val repository: NewsRepository) : ViewModel() {
 
     private val _favoriteArticles = MutableLiveData<List<Article>>()
     val favoriteArticles: LiveData<List<Article>> = _favoriteArticles
+
+    private val _article = MutableStateFlow<Event<Article>?>(null)
+    val article: StateFlow<Event<Article>?> = _article
+
 
     private var currentPage = 0
     private val pageSize = 10
@@ -58,6 +65,24 @@ class NewsViewModel(private val repository: NewsRepository) : ViewModel() {
                     _articles.value = (_articles.value ?: emptyList()) + result
                     currentPage++
                 }
+            } catch (e: Exception) {
+                _error.value = e.localizedMessage ?: "An error occurred"
+            } finally {
+                _loading.value = false
+                isLoading = false
+            }
+        }
+    }
+
+
+    fun fetchArticle( id: Int) {
+        viewModelScope.launch {
+            _loading.value = true
+            isLoading = true
+            try {
+                val result = repository.getArticleById(id)
+                _article.value = Event(result)
+
             } catch (e: Exception) {
                 _error.value = e.localizedMessage ?: "An error occurred"
             } finally {
