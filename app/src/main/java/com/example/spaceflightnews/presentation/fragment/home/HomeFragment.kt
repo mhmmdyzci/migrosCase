@@ -5,6 +5,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +21,7 @@ import com.example.spaceflightnews.util.PreferenceHelper
 import com.example.spaceflightnews.viewModel.NewsViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
+import com.example.spaceflightnews.R
 import java.util.Locale
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::inflate) {
@@ -56,8 +58,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
 
     private fun setupRecyclerView() {
         articleAdapter = ArticleAdapter { article ->
-            val action = HomeFragmentDirections.actionHomeFragmentToDetailFragment(article)
-            findNavController().navigate(action)
+            if (NetworkUtil.isNetworkAvailable(requireContext())) {
+                viewModel.fetchArticle(article.id)
+            } else {
+                val action = HomeFragmentDirections.actionHomeFragmentToDetailFragment(article)
+                findNavController().navigate(action)
+            }
+
         }
         binding.articleRecyclerView.adapter = articleAdapter
 
@@ -80,7 +87,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
                             if (currentTime - lastToastTime > toastCooldownMillis) {
                                 Toast.makeText(
                                     requireContext(),
-                                    "No internet connection",
+                                    getString(R.string.no_internet_connection),
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 lastToastTime = currentTime
@@ -105,6 +112,16 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
                 binding.lastUpdateLayout.visibility = View.GONE
             }
         }
+
+        lifecycleScope.launchWhenStarted {
+            viewModel.article.collect { event ->
+                event?.getContentIfNotHandled()?.let { article ->
+                    val action = HomeFragmentDirections.actionHomeFragmentToDetailFragment(article)
+                    findNavController().navigate(action)
+                }
+            }
+        }
+
 
         viewModel.loading.observe(viewLifecycleOwner) {
             if (isSwipeRefreshing) {
@@ -133,7 +150,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
             } else {
                 isSwipeRefreshing = false
                 binding.swipeRefreshLayout.isRefreshing = false
-                Toast.makeText(requireContext(), "No internet connection", Toast.LENGTH_SHORT)
+                Toast.makeText(requireContext(), getString(R.string.no_internet_connection), Toast.LENGTH_SHORT)
                     .show()
             }
         }
