@@ -1,6 +1,7 @@
 # 🚀 Spaceflight News Android App
+**Demo bağlantısı:** [Google Drive Video](https://drive.google.com/file/d/13WLBTD8SJuQyjAXGWLXCVcAk6clbQQdg/view?usp=sharing)
 
-Bu proje, **Spaceflight News API** ile entegre çalışan, güncel uzay haberlerini listeleyen modern bir Android uygulamasıdır.  
+Bu proje, [Spaceflight News API](https://api.spaceflightnewsapi.net/) ile entegre çalışan, güncel uzay haberlerini listeleyen modern bir Android uygulamasıdır.  
 Kotlin dilinde yazılmış olup **Clean Architecture** prensiplerine uygun olarak yapılandırılmıştır.
 
 ---
