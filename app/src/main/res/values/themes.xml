@@ -9,8 +9,24 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:windowDisablePreview">true</item>
         <item name="android:windowIsTranslucent">true</item>
+
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:textColorHint">#9CA3AF</item>
+        <item name="editTextColor">@android:color/white</item>
+        <item name="android:editTextColor">@android:color/white</item>
+        <item name="colorOnSurface">@android:color/white</item>
+        <item name="colorOnBackground">@android:color/white</item>
     </style>
 
 
     <style name="Theme.SpaceflightNews" parent="Base.Theme.SpaceflightNews" />
+
+    <style name="AppBarLayoutTheme" parent="ThemeOverlay.MaterialComponents.Dark">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">@android:color/white</item>
+        <item name="android:textColorHint">#9CA3AF</item>
+        <item name="editTextColor">@android:color/white</item>
+        <item name="android:editTextColor">@android:color/white</item>
+    </style>
 </resources>

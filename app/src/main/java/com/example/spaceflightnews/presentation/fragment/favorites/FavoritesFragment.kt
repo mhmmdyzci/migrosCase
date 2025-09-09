@@ -7,17 +7,18 @@ import androidx.navigation.fragment.findNavController
 import com.example.spaceflightnews.core.SpaceflightApp
 import com.example.spaceflightnews.databinding.FragmentFavoritesBinding
 import com.example.spaceflightnews.domain.model.Article
+import com.example.spaceflightnews.domain.usecase.*
 import com.example.spaceflightnews.network.SpaceflightApiService
 import com.example.spaceflightnews.network.repository.NewsRepositoryImpl
 import com.example.spaceflightnews.presentation.fragment.home.adapter.ArticleAdapter
 import com.example.spaceflightnews.util.BaseFragment
-import com.example.spaceflightnews.viewModel.NewsViewModel
+import com.example.spaceflightnews.viewModel.FavoritesViewModel
 
 class FavoritesFragment :
     BaseFragment<FragmentFavoritesBinding>(FragmentFavoritesBinding::inflate) {
 
 
-    private lateinit var viewModel: NewsViewModel
+    private lateinit var viewModel: FavoritesViewModel
     private lateinit var articleAdapter: ArticleAdapter
     private var articleList: List<Article> = emptyList()
 
@@ -30,14 +31,23 @@ class FavoritesFragment :
     }
 
     private fun initViewModel() {
-        val api = SpaceflightApp.Companion.retrofit.create(SpaceflightApiService::class.java)
-        val dao = SpaceflightApp.Companion.articleDao
-        viewModel = NewsViewModel(NewsRepositoryImpl(api, dao))
+        val api = SpaceflightApp.retrofit.create(SpaceflightApiService::class.java)
+        val dao = SpaceflightApp.articleDao
+        val repository = NewsRepositoryImpl(api, dao)
+        
+        // Initialize UseCases for Favorites
+        val getFavoriteArticlesUseCase = GetFavoriteArticlesUseCase(repository)
+        val updateFavoriteUseCase = UpdateFavoriteUseCase(repository)
+        
+        viewModel = FavoritesViewModel(
+            getFavoriteArticlesUseCase,
+            updateFavoriteUseCase
+        )
         viewModel.getFavoriteArticles()
     }
 
     private fun setupRecyclerView() {
-        articleAdapter = ArticleAdapter { article ->
+        articleAdapter = ArticleAdapter(requireContext()){ article ->
             val action =
                 FavoritesFragmentDirections.actionFavoritesFragmentToDetailFragment(article)
             findNavController().navigate(action)
@@ -51,14 +61,14 @@ class FavoritesFragment :
     private fun setupObservers() {
         viewModel.favoriteArticles.observe(viewLifecycleOwner) {
             articleList = it
-            if (articleList.isEmpty()) {
+            articleAdapter.submitList(it)
+            if (it.isEmpty()) {
                 binding.emptyView.visibility = View.VISIBLE
                 binding.favoritesRecyclerView.visibility = View.GONE
-                return@observe
+            } else {
+                binding.emptyView.visibility = View.GONE
+                binding.favoritesRecyclerView.visibility = View.VISIBLE
             }
-            binding.emptyView.visibility = View.GONE
-            binding.favoritesRecyclerView.visibility = View.VISIBLE
-            articleAdapter.submitList(it)
         }
 
         viewModel.loading.observe(viewLifecycleOwner) {

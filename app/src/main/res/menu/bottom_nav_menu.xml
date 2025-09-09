@@ -1,9 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/homeFragment"
-        android:icon="@drawable/ic_home"
+        android:icon="@drawable/ic_newspaper"
         android:enabled="true"
-        android:title="@string/home"/>
+        android:title="@string/latest_new"/>
 
     <item
         android:id="@+id/favoritesFragment"
