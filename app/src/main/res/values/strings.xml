@@ -18,10 +18,20 @@
     
     <string name="updated_time_ago">Updated %s</string>
     <string name="showing_cached_data">Showing cached data</string>
-    <string name="last_updated_time">Last updated %s</string>
-    <string name="just_now">just now</string>
-    <string name="minutes_ago">%d min ago</string>
+    <string name="last_updated">Last updated: %s</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
+    <string name="error_loading_articles">Failed to load articles</string>
+    <string name="retry">Retry</string>
+    <string name="article_image_description">Article image</string>
+    <string name="search_button_description">Search articles</string>
+    <string name="clear_search_description">Clear search</string>
+    <string name="favorite_button_description">Add to favorites</string>
+    <string name="share_button_description">Share article</string>
+    <string name="back_button_description">Go back</string>
     <string name="hours_ago">%dh ago</string>
     <string name="days_ago">%dd ago</string>
+    <string name="just_now">just now</string>
+    <string name="minutes_ago">%d min ago</string>
 
 </resources>
