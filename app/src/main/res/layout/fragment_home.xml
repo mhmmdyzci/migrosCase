@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -6,7 +5,8 @@
     android:id="@+id/home_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/dark_navy"
+    android:theme="@style/AppBarLayoutTheme"
     tools:context=".presentation.fragment.home.HomeFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -14,86 +14,129 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Light"
-        android:background="@color/white"
+        android:background="@color/dark_navy"
+        android:theme="@style/AppBarLayoutTheme"
         android:elevation="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingVertical="8dp"
-            android:paddingHorizontal="16dp"
-            android:background="@color/white"
             app:layout_scrollFlags="scroll|enterAlways">
 
             <LinearLayout
+                android:id="@+id/header"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
+                android:background="@color/dark_navy"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:layout_marginVertical="10dp"
-                >
+                android:padding="16dp">
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="1"
-                    android:background="@drawable/edit_text_white_rounded_bg_12dp_corner"
-                    android:baselineAligned="false"
-                    android:orientation="horizontal"
-                    android:padding="3dp">
-
-                    <ImageView
-                        android:id="@+id/imageView"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="5dp"
-                        android:src="@drawable/search_icon"
-                        app:tint="@color/gray_button_stroke_color" />
-
-                    <EditText
-                        android:id="@+id/edit_text_search"
-                        android:layout_width="0dp"
-                        android:layout_height="38dp"
-                        android:layout_marginRight="4dp"
-                        android:layout_weight="0.8"
-                        android:autofillHints="name"
-                        android:background="@null"
-                        android:fontFamily="@font/gilroy_regular"
-                        android:hint="@string/search"
-                        android:inputType="text"
-                        android:paddingLeft="8dp"
-                        android:paddingRight="8dp"
-                        android:textColor="@color/black"
-                        android:textColorHint="@color/gray_button_stroke_color"
-                        android:textSize="14sp" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-            <LinearLayout
-                android:id="@+id/lastUpdateLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:visibility="gone"
-                android:layout_gravity="center_horizontal"
-                android:padding="8dp"
-                android:background="@drawable/edit_text_white_rounded_bg_12dp_corner">
+                <View
+                    android:layout_width="40dp"
+                    android:layout_height="40dp" />
 
                 <TextView
-                    android:id="@+id/lastUpdateText"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    tools:text="Last Update: 07 May 14:30"
-                    android:textSize="14sp"
-                    android:fontFamily="@font/gilroy_regular"
-                    android:textColor="@color/black" />
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/news"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/search"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/search_icon"
+                    app:tint="@color/white" />
+
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/searchLayout"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@color/dark_navy"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <ImageButton
+                    android:id="@+id/backButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="@color/white" />
+
+                <EditText
+                    android:id="@+id/editTextSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+
+                    android:hint="@string/search_articles_hint"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#9CA3AF"
+                    android:background="@android:color/transparent"
+                    android:privateImeOptions="nm"
+                    android:imeOptions="actionSearch|flagNoExtractUi"
+                    android:inputType="text|textNoSuggestions"
+                    android:maxLines="1"
+                    android:textSize="16sp"
+                    />
+
+                <ImageButton
+                    android:id="@+id/clearSearch"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_clear"
+                    app:tint="@color/white"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/statusBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/dark_navy"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:gravity="center_vertical"
+            app:layout_scrollFlags="scroll|enterAlways"
+            android:visibility="gone">
+
+            <View
+                android:id="@+id/statusIndicator"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/status_indicator_online" />
+
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/gray"
+                android:textSize="12sp"
+                android:fontFamily="@font/roboto_regular" />
+
+        </LinearLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
