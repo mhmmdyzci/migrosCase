@@ -1,7 +1,7 @@
 package com.example.spaceflightnews.presentation.fragment.home
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,30 +9,29 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.spaceflightnews.core.SpaceflightApp
 import com.example.spaceflightnews.databinding.FragmentHomeBinding
 import com.example.spaceflightnews.domain.model.Article
+import com.example.spaceflightnews.domain.usecase.*
 import com.example.spaceflightnews.network.SpaceflightApiService
 import com.example.spaceflightnews.network.repository.NewsRepositoryImpl
 import com.example.spaceflightnews.presentation.fragment.home.adapter.ArticleAdapter
 import com.example.spaceflightnews.util.BaseFragment
 import com.example.spaceflightnews.util.NetworkUtil
 import com.example.spaceflightnews.util.PreferenceHelper
-import com.example.spaceflightnews.viewModel.NewsViewModel
+import com.example.spaceflightnews.viewModel.HomeViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import com.example.spaceflightnews.R
 import java.util.Locale
 import androidx.core.view.isVisible
-import androidx.core.graphics.toColorInt
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::inflate) {
 
-    private lateinit var viewModel: NewsViewModel
+    private lateinit var viewModel: HomeViewModel
     private lateinit var articleAdapter: ArticleAdapter
     private var articleList: List<Article> = emptyList()
     private var isSwipeRefreshing = false
@@ -44,10 +43,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+        setupObservers()
         setupSwipeToRefresh()
         setupSearch()
         setupSearchUI()
-        setupObservers()
+        setupStatusBar()
+        setupRetryButton()
 
     }
 
@@ -60,18 +61,21 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     private fun initViewModel() {
         val api = SpaceflightApp.retrofit.create(SpaceflightApiService::class.java)
         val dao = SpaceflightApp.articleDao
-        viewModel = NewsViewModel(NewsRepositoryImpl(api, dao))
+        val repository = NewsRepositoryImpl(api, dao)
+
+        val getArticlesUseCase = GetArticlesUseCase(repository)
+        val getCachedArticlesUseCase = GetCachedArticlesUseCase(repository)
+
+        viewModel = HomeViewModel(
+            getArticlesUseCase,
+            getCachedArticlesUseCase
+        )
     }
 
     private fun setupRecyclerView() {
         articleAdapter = ArticleAdapter(requireContext()) { article ->
-            if (NetworkUtil.isNetworkAvailable(requireContext())) {
-                viewModel.fetchArticle(article.id)
-            } else {
-                val action = HomeFragmentDirections.actionHomeFragmentToDetailFragment(article)
-                findNavController().navigate(action)
-            }
-
+            val action = HomeFragmentDirections.actionHomeFragmentToDetailFragment(article)
+            findNavController().navigate(action)
         }
         binding.articleRecyclerView.adapter = articleAdapter
 
@@ -104,7 +108,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
                 }
             }
         })
-
     }
 
 
@@ -115,14 +118,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
             updateStatusBar()
         }
 
-        lifecycleScope.launchWhenStarted {
-            viewModel.article.collect { event ->
-                event?.getContentIfNotHandled()?.let { article ->
-                    val action = HomeFragmentDirections.actionHomeFragmentToDetailFragment(article)
-                    findNavController().navigate(action)
-                }
-            }
-        }
 
 
         viewModel.loading.observe(viewLifecycleOwner) {
@@ -136,24 +131,39 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
 
         viewModel.error.observe(viewLifecycleOwner) {
             if (it.isNotBlank()) {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                binding.errorMessage.text = it
             }
+        }
+        
+        viewModel.showRetry.observe(viewLifecycleOwner) { showRetry ->
+            animateViewVisibility(binding.errorLayout, showRetry)
+            animateViewVisibility(binding.articleRecyclerView, !showRetry)
         }
 
 
     }
 
     private fun setupSwipeToRefresh() {
-        binding.swipeRefreshLayout.setOnRefreshListener {
-            if (NetworkUtil.isNetworkAvailable(requireContext()) && !viewModel.isLoading()) {
-                isSwipeRefreshing = true
-                viewModel.refreshFromApi(requireContext())
-
-            } else {
-                isSwipeRefreshing = false
-                binding.swipeRefreshLayout.isRefreshing = false
-                Toast.makeText(requireContext(), getString(R.string.no_internet_connection), Toast.LENGTH_SHORT)
-                    .show()
+        binding.swipeRefreshLayout.apply {
+            setColorSchemeResources(
+                R.color.blue,
+                R.color.dark_blue
+            )
+            setOnRefreshListener {
+                when {
+                    !NetworkUtil.isNetworkAvailable(requireContext()) -> {
+                        isRefreshing = false
+                        Toast.makeText(requireContext(), getString(R.string.no_internet_connection), Toast.LENGTH_SHORT).show()
+                    }
+                    viewModel.isLoading() -> {
+                        isRefreshing = false
+                        Toast.makeText(requireContext(), "Already loading...", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> {
+                        isSwipeRefreshing = true
+                        viewModel.refreshFromApi(requireContext())
+                    }
+                }
             }
         }
     }
@@ -176,17 +186,18 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
             ) {
             }
 
-            override fun afterTextChanged(updatedText: Editable?) {
-                val searchText = updatedText.toString()
-                if (searchText.isEmpty()) {
-                    animateViewVisibility(binding.clearSearch, false)
-                    binding.editTextSearch.clearFocus()
+            override fun afterTextChanged(text: Editable?) {
+                val query = text.toString().trim()
+                if (query.isEmpty()) {
+                    articleAdapter.submitList(articleList)
                     viewModel.isSearching = false
-                    refreshList()
                 } else {
-                    animateViewVisibility(binding.clearSearch, true)
                     viewModel.isSearching = true
-                    filterList(searchText, articleList)
+                    val filteredList = articleList.filter { article ->
+                        article.title.contains(query, ignoreCase = true) ||
+                                article.summary.contains(query, ignoreCase = true)
+                    }
+                    articleAdapter.submitList(filteredList)
                 }
             }
         })
@@ -220,16 +231,27 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
         }
     }
     
+    private fun setupStatusBar() {
+        updateStatusBar()
+    }
+    
+    private fun setupRetryButton() {
+        binding.retryButton.setOnClickListener {
+            viewModel.retryFetchArticles(requireContext())
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
     private fun updateStatusBar() {
         val lastUpdateTime = PreferenceHelper.getLastUpdateTime(requireContext())
         val isOnline = NetworkUtil.isNetworkAvailable(requireContext())
         
         if (lastUpdateTime == -1L || articleList.isEmpty()) {
-            binding.statusBar.visibility = View.GONE
+            animateViewVisibility(binding.statusBar, false)
             return
         }
         
-        binding.statusBar.visibility = View.VISIBLE
+        animateViewVisibility(binding.statusBar, true)
         
         val timeAgo = getTimeAgoString(lastUpdateTime)
         
@@ -239,7 +261,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
         } else {
             binding.statusIndicator.setBackgroundResource(R.drawable.status_indicator_offline)
             binding.statusText.text = getString(R.string.showing_cached_data) + " • " + 
-                getString(R.string.last_updated_time, timeAgo)
+                getString(R.string.last_updated, timeAgo)
         }
     }
     
@@ -288,9 +310,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     private fun showSearchBar() {
         val slideOutAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_out_top)
         binding.header.startAnimation(slideOutAnimation)
-        binding.header.visibility = View.GONE
+        animateViewVisibility(binding.header, false)
         
-        binding.searchLayout.visibility = View.VISIBLE
+        animateViewVisibility(binding.searchLayout, true)
         val slideInAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_in_top)
         binding.searchLayout.startAnimation(slideInAnimation)
         
@@ -301,9 +323,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     private fun hideSearchBar() {
         val slideOutAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_out_top)
         binding.searchLayout.startAnimation(slideOutAnimation)
-        binding.searchLayout.visibility = View.GONE
+        animateViewVisibility(binding.searchLayout, false)
         
-        binding.header.visibility = View.VISIBLE
+        animateViewVisibility(binding.header, true)
         val slideInAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_in_top)
         binding.header.startAnimation(slideInAnimation)
         
