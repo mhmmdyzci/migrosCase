@@ -30,14 +30,14 @@ class FavoritesFragment :
     }
 
     private fun initViewModel() {
-        val api = SpaceflightApp.Companion.retrofit.create(SpaceflightApiService::class.java)
-        val dao = SpaceflightApp.Companion.articleDao
+        val api = SpaceflightApp.retrofit.create(SpaceflightApiService::class.java)
+        val dao = SpaceflightApp.articleDao
         viewModel = NewsViewModel(NewsRepositoryImpl(api, dao))
         viewModel.getFavoriteArticles()
     }
 
     private fun setupRecyclerView() {
-        articleAdapter = ArticleAdapter { article ->
+        articleAdapter = ArticleAdapter(requireContext()){ article ->
             val action =
                 FavoritesFragmentDirections.actionFavoritesFragmentToDetailFragment(article)
             findNavController().navigate(action)

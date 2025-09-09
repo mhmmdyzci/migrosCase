@@ -51,41 +51,34 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>(FragmentDetailBinding
             detailSummary.text = article.summary
             detailDate.text = formatDate(article.publishedAt)
 
-            if (!article.imageUrl.isNullOrEmpty()) {
+            Glide.with(requireContext())
+                .load(article.imageUrl)
+                .error(R.drawable.default_space)
+                .listener(object : RequestListener<Drawable> {
 
-                Glide.with(requireContext())
-                    .load(article.imageUrl)
-                    .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable?>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        imgProgressBar.visibility = View.GONE
+                        return false
+                    }
 
+                    override fun onResourceReady(
+                        resource: Drawable,
+                        model: Any,
+                        target: Target<Drawable?>?,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        imgProgressBar.visibility = View.GONE
+                        return false
+                    }
 
-
-                        override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Drawable?>,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            imgProgressBar.visibility = View.GONE
-                            cardNews.visibility = View.GONE
-                            return false
-                        }
-
-                        override fun onResourceReady(
-                            resource: Drawable,
-                            model: Any,
-                            target: Target<Drawable?>?,
-                            dataSource: DataSource,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            imgProgressBar.visibility = View.GONE
-                            return false
-                        }
-
-                    })
-                    .into(imgNews)
-            } else {
-                cardNews.visibility = View.GONE
-            }
+                })
+                .into(imgNewsDetail)
 
 
 

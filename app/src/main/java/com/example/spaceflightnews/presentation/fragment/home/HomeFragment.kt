@@ -1,9 +1,13 @@
 package com.example.spaceflightnews.presentation.fragment.home
 
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -23,6 +27,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import com.example.spaceflightnews.R
 import java.util.Locale
+import androidx.core.view.isVisible
+import androidx.core.graphics.toColorInt
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::inflate) {
 
@@ -40,6 +46,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
         setupRecyclerView()
         setupSwipeToRefresh()
         setupSearch()
+        setupSearchUI()
         setupObservers()
 
     }
@@ -57,7 +64,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     }
 
     private fun setupRecyclerView() {
-        articleAdapter = ArticleAdapter { article ->
+        articleAdapter = ArticleAdapter(requireContext()) { article ->
             if (NetworkUtil.isNetworkAvailable(requireContext())) {
                 viewModel.fetchArticle(article.id)
             } else {
@@ -105,12 +112,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
         viewModel.articles.observe(viewLifecycleOwner) {
             articleList = it
             articleAdapter.submitList(it)
-            if (!getFormattedLastUpdate().isEmpty() && it.isNotEmpty()) {
-                binding.lastUpdateLayout.visibility = View.VISIBLE
-                binding.lastUpdateText.text = getFormattedLastUpdate()
-            } else {
-                binding.lastUpdateLayout.visibility = View.GONE
-            }
+            updateStatusBar()
         }
 
         lifecycleScope.launchWhenStarted {
@@ -157,7 +159,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
     }
 
     private fun setupSearch() {
-
         binding.editTextSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(
                 text: CharSequence?,
@@ -176,20 +177,39 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
             }
 
             override fun afterTextChanged(updatedText: Editable?) {
-                if (updatedText.toString().isEmpty() == true) {
-                    binding.lastUpdateLayout.visibility = View.VISIBLE
+                val searchText = updatedText.toString()
+                if (searchText.isEmpty()) {
+                    animateViewVisibility(binding.clearSearch, false)
                     binding.editTextSearch.clearFocus()
                     viewModel.isSearching = false
                     refreshList()
                 } else {
-                    binding.lastUpdateLayout.visibility = View.GONE
-                    viewModel.isSearching = false
-                    filterList(updatedText.toString(), articleList)
+                    animateViewVisibility(binding.clearSearch, true)
+                    viewModel.isSearching = true
+                    filterList(searchText, articleList)
                 }
             }
         })
+    }
 
+    private fun setupSearchUI() {
+        binding.search.setOnClickListener {
+            val bounceAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.scale_bounce)
+            binding.search.startAnimation(bounceAnimation)
+            showSearchBar()
+        }
 
+        binding.backButton.setOnClickListener {
+            val bounceAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.scale_bounce)
+            binding.backButton.startAnimation(bounceAnimation)
+            hideSearchBar()
+        }
+
+        binding.clearSearch.setOnClickListener {
+            val bounceAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.scale_bounce)
+            binding.clearSearch.startAnimation(bounceAnimation)
+            binding.editTextSearch.setText("")
+        }
     }
 
     private fun decideInitialLoad() {
@@ -197,6 +217,50 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
             viewModel.refreshFromApi(requireContext())
         } else {
             viewModel.loadCachedArticles()
+        }
+    }
+    
+    private fun updateStatusBar() {
+        val lastUpdateTime = PreferenceHelper.getLastUpdateTime(requireContext())
+        val isOnline = NetworkUtil.isNetworkAvailable(requireContext())
+        
+        if (lastUpdateTime == -1L || articleList.isEmpty()) {
+            binding.statusBar.visibility = View.GONE
+            return
+        }
+        
+        binding.statusBar.visibility = View.VISIBLE
+        
+        val timeAgo = getTimeAgoString(lastUpdateTime)
+        
+        if (isOnline) {
+            binding.statusIndicator.setBackgroundResource(R.drawable.status_indicator_online)
+            binding.statusText.text = getString(R.string.updated_time_ago, timeAgo)
+        } else {
+            binding.statusIndicator.setBackgroundResource(R.drawable.status_indicator_offline)
+            binding.statusText.text = getString(R.string.showing_cached_data) + " • " + 
+                getString(R.string.last_updated_time, timeAgo)
+        }
+    }
+    
+    private fun getTimeAgoString(timestamp: Long): String {
+        val now = System.currentTimeMillis()
+        val diff = now - timestamp
+        
+        return when {
+            diff < 60000 -> getString(R.string.just_now)
+            diff < 3600000 -> {
+                val minutes = (diff / 60000).toInt()
+                getString(R.string.minutes_ago, minutes)
+            }
+            diff < 86400000 -> {
+                val hours = (diff / 3600000).toInt()
+                getString(R.string.hours_ago, hours)
+            }
+            else -> {
+                val days = (diff / 86400000).toInt()
+                getString(R.string.days_ago, days)
+            }
         }
     }
 
@@ -219,6 +283,56 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::infl
             article.title.contains(searchQuery, ignoreCase = true) == true
         }
         articleAdapter.submitList(filteredList)
+    }
+
+    private fun showSearchBar() {
+        val slideOutAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_out_top)
+        binding.header.startAnimation(slideOutAnimation)
+        binding.header.visibility = View.GONE
+        
+        binding.searchLayout.visibility = View.VISIBLE
+        val slideInAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_in_top)
+        binding.searchLayout.startAnimation(slideInAnimation)
+        
+        binding.editTextSearch.requestFocus()
+        showKeyboard(binding.editTextSearch)
+    }
+
+    private fun hideSearchBar() {
+        val slideOutAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_out_top)
+        binding.searchLayout.startAnimation(slideOutAnimation)
+        binding.searchLayout.visibility = View.GONE
+        
+        binding.header.visibility = View.VISIBLE
+        val slideInAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_in_top)
+        binding.header.startAnimation(slideInAnimation)
+        
+        binding.editTextSearch.setText("")
+        hideKeyboard(binding.editTextSearch)
+        viewModel.isSearching = false
+        refreshList()
+    }
+
+    private fun showKeyboard(view: View) {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    private fun hideKeyboard(view: View) {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    private fun animateViewVisibility(view: View, show: Boolean) {
+        if (show && view.visibility != View.VISIBLE) {
+            view.visibility = View.VISIBLE
+            val fadeInAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_in)
+            view.startAnimation(fadeInAnimation)
+        } else if (!show && view.isVisible) {
+            val fadeOutAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.fade_out)
+            view.startAnimation(fadeOutAnimation)
+            view.visibility = View.GONE
+        }
     }
 }
 

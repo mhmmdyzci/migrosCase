@@ -64,4 +64,10 @@
     <color name="dark_blue">#1A2B41</color>
     <color name="main_color">#1F1D2B</color>
     <color name="transparent">#00000000</color>
+    <color name="dark_navy">#0A192F</color>
+    <color name="card_bg">#172A46</color>
+    <color name="gray_400">#9CA3AF</color>
+    <color name="gray_500">#6B7280</color>
+    <color name="gray_800">#1F2937</color>
+    <color name="orange_500">#F97316</color>
 </resources>
