@@ -1,7 +1,7 @@
 # 🚀 Spaceflight News Android App
 **Demo bağlantısı:** [Trailer](https://drive.google.com/file/d/13WLBTD8SJuQyjAXGWLXCVcAk6clbQQdg/view?usp=sharing)
 
-Bu proje, [Spaceflight News API](https://api.spaceflightnewsapi.net/) ile entegre çalışan, güncel uzay haberlerini listeleyen modern bir Android uygulamasıdır.  
+Bu proje, [Spaceflight News API](https://api.spaceflightnewsapi.net/v4/) ile entegre çalışan, güncel uzay haberlerini listeleyen modern bir Android uygulamasıdır.  
 Kotlin dilinde yazılmış olup **Clean Architecture** prensiplerine uygun olarak yapılandırılmıştır.
 
 ---
@@ -22,7 +22,8 @@ Kotlin dilinde yazılmış olup **Clean Architecture** prensiplerine uygun olara
 | Katman            | Teknolojiler |
 |-------------------|--------------|
 | **UI**            | XML, Navigation Component, RecyclerView, ViewBinding |
-| **Veri Katmanı**  | Retrofit, Room, DAO, DTO-Entity-Model dönüşümleri |
+| **Domain**        | Use Case pattern, Repository arayüzleri |
+| **Data**          | Retrofit, Room, DAO, DTO-Entity-Model dönüşümleri |
 | **ViewModel**     | Android Architecture Components (LiveData, ViewModel) |
 | **Dependency**    | Manual constructor injection |
 | **Test**          | JUnit, Coroutine Test, MockK |
@@ -40,8 +41,8 @@ Kotlin dilinde yazılmış olup **Clean Architecture** prensiplerine uygun olara
 
 Uygulama, **Clean Architecture** prensiplerine göre 3 katmana ayrılmıştır:
 
-- **presentation**: Fragment ve ViewModel katmanı
-- **domain**: Modeller ve repository arayüzleri
+- **presentation**: Fragment + her fragmente özel ViewModel
+- **domain**: Use Case sınıfları, modeller ve repository arayüzleri
 - **data**: DTO, Entity, Room, Retrofit
 
 ---
